@@ -63,6 +63,7 @@ struct game_state
 
     assets Assets;
 
+    loaded_bitmap LaserBitmap;
 #if 0
     loaded_bitmap StructuredArt;
 #endif

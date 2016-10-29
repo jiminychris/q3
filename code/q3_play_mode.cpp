@@ -2615,6 +2615,11 @@ END_TIMED_BLOCK(Collision);
                         ++X)
                     {
                         v3 Offset = V3(X*FieldDim.x, Y*FieldDim.y, 0);
+                        PushBitmap(RenderBuffer, &GameState->LaserBitmap, Offset + Entity->P,
+                                   XAxis, YAxis,
+                                   Entity->Dim,
+                                   Color);
+
                     }
                 }
 //            DrawLine(BackBuffer, State->P, Laser->P, V4(0.0f, 0.0f, 1.0f, 1.0f));

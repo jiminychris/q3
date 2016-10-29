@@ -144,7 +144,7 @@ DEBUGDrawFillBar(render_buffer *RenderBuffer, text_layout *Layout, u64 Used, u64
 }
 #endif
 
-#if 1
+#if 0
 #pragma optimize("gts", on)
 #endif
 // TODO(chris): Further optimization
@@ -671,17 +671,27 @@ RenderBitmap(render_chunk *RenderChunk, loaded_bitmap *Bitmap, v2 Origin, v2 XAx
 }
 
 internal void
-RenderTile(loaded_bitmap *BackBuffer, loaded_tile *Tile, u32 XMin, u32 YMin, palette *Palette)
+RenderTile(loaded_bitmap *BackBuffer, loaded_tile *Tile, s32 InitXMin, s32 InitYMin, palette *Palette,
+           s32 OffsetX = 0, s32 OffsetY = 0)
 {
+    s32 XMin = Clamp(OffsetX, InitXMin, OffsetX + BackBuffer->Width);
+    s32 XMax = Clamp(OffsetX, InitXMin + TILE_WIDTH, OffsetX + BackBuffer->Width);
+    
+    s32 YMin = Clamp(OffsetY, InitYMin, OffsetY + BackBuffer->Height);
+    s32 YMax = Clamp(OffsetY, InitYMin + TILE_HEIGHT, OffsetY + BackBuffer->Height);
+
+    u32 TilePitch = TILE_WIDTH >> 2;
+    u8 *SourceRow = Tile->ColorIndices + TilePitch*(YMin - InitYMin);
     u8 *PixelRow = (u8 *)BackBuffer->Memory + BackBuffer->Pitch*YMin;
-    u8 *Source = Tile->ColorIndices;
-    for(s32 Y = 0;
-        Y < TILE_HEIGHT;
+    for(s32 Y = YMin;
+        Y < YMax;
         ++Y)
     {
         u32 *Dest = (u32 *)PixelRow + XMin;
-        for(s32 X = 0;
-            X < TILE_WIDTH;
+        Assert(!((XMin - InitXMin) & 3));
+        u8 *Source = SourceRow + ((XMin - InitXMin) >> 2);
+        for(s32 X = XMin;
+            X < XMax;
             X += 4)
         {
             u32 DestColor0 = Palette->Colors[((*Source >> 0) & 3)];
@@ -695,6 +705,7 @@ RenderTile(loaded_bitmap *BackBuffer, loaded_tile *Tile, u32 XMin, u32 YMin, pal
             *Dest++ = DestColor3;
             ++Source;
         }
+        SourceRow += TilePitch;
         PixelRow += BackBuffer->Pitch;
     }
 }
@@ -1789,7 +1800,7 @@ RenderTree(render_buffer *RenderBuffer, render_chunk *RenderChunk,
                 u32 TileX = 16*(Data->TileIndex&15);
 
                 RenderTile(&RenderChunk->BackBuffer, Data->Tile,
-                           TileX, TileY, Palette);
+                           TileX, TileY, Palette, OffsetX, OffsetY);
             } break;
 
             case RenderCommand_aligned_rectangle:
