@@ -144,7 +144,7 @@ DEBUGDrawFillBar(render_buffer *RenderBuffer, text_layout *Layout, u64 Used, u64
 }
 #endif
 
-#if 0
+#if 1
 #pragma optimize("gts", on)
 #endif
 // TODO(chris): Further optimization
@@ -671,41 +671,40 @@ RenderBitmap(render_chunk *RenderChunk, loaded_bitmap *Bitmap, v2 Origin, v2 XAx
 }
 
 internal void
-RenderTile(loaded_bitmap *BackBuffer, loaded_tile *Tile, s32 InitXMin, s32 InitYMin, palette *Palette,
-           s32 OffsetX = 0, s32 OffsetY = 0)
+RenderTile(loaded_bitmap *BackBuffer, loaded_tile *Tile, u32 TileX, u32 TileY, palette *Palette,
+           u32 Scale, s32 OffsetX = 0, s32 OffsetY = 0)
 {
-    s32 XMin = Clamp(OffsetX, InitXMin, OffsetX + BackBuffer->Width);
-    s32 XMax = Clamp(OffsetX, InitXMin + TILE_WIDTH, OffsetX + BackBuffer->Width);
+    s32 XMin = Clamp(OffsetX, TileX, OffsetX + BackBuffer->Width);
+    s32 XMax = Clamp(OffsetX, TileX + Scale*TILE_WIDTH, OffsetX + BackBuffer->Width);
     
-    s32 YMin = Clamp(OffsetY, InitYMin, OffsetY + BackBuffer->Height);
-    s32 YMax = Clamp(OffsetY, InitYMin + TILE_HEIGHT, OffsetY + BackBuffer->Height);
+    s32 YMin = Clamp(OffsetY, TileY, OffsetY + BackBuffer->Height);
+    s32 YMax = Clamp(OffsetY, TileY + Scale*TILE_HEIGHT, OffsetY + BackBuffer->Height);
 
     u32 TilePitch = TILE_WIDTH >> 2;
-    u8 *SourceRow = Tile->ColorIndices + TilePitch*(YMin - InitYMin);
     u8 *PixelRow = (u8 *)BackBuffer->Memory + BackBuffer->Pitch*YMin;
     for(s32 Y = YMin;
         Y < YMax;
         ++Y)
     {
         u32 *Dest = (u32 *)PixelRow + XMin;
-        Assert(!((XMin - InitXMin) & 3));
-        u8 *Source = SourceRow + ((XMin - InitXMin) >> 2);
+        u32 SourceY = (Y - TileY) / Scale;
+        u8 *SourceRow = Tile->ColorIndices + SourceY*TilePitch;
+        Assert(!((XMin - TileX) & 3));
         for(s32 X = XMin;
             X < XMax;
-            X += 4)
+            ++X)
         {
-            u32 DestColor0 = Palette->Colors[((*Source >> 0) & 3)];
-            u32 DestColor1 = Palette->Colors[((*Source >> 2) & 3)];
-            u32 DestColor2 = Palette->Colors[((*Source >> 4) & 3)];
-            u32 DestColor3 = Palette->Colors[((*Source >> 6) & 3)];
+            u32 SourceRawX = (X - TileX) / Scale;
+            u32 SourceBitOffset = 2*(SourceRawX & 3);
+            u32 SourceX = SourceRawX >> 2;
+            u8 *Source = SourceRow + SourceX;
             
-            *Dest++ = DestColor0;
-            *Dest++ = DestColor1;
-            *Dest++ = DestColor2;
-            *Dest++ = DestColor3;
-            ++Source;
+            u8 ColorIndex = (*Source >> SourceBitOffset) & 3;
+            
+            u32 DestColor = Palette->Colors[ColorIndex];
+            
+            *Dest++ = DestColor;
         }
-        SourceRow += TilePitch;
         PixelRow += BackBuffer->Pitch;
     }
 }
@@ -1796,11 +1795,31 @@ RenderTree(render_buffer *RenderBuffer, render_chunk *RenderChunk,
 
                 palette *Palette = RenderBuffer->Palettes + PaletteIndex;
 
-                u32 TileY = RenderBuffer->Height - 16*(1 + (Data->TileIndex>>4));
-                u32 TileX = 16*(Data->TileIndex&15);
+                u32 NESWidth = 256;
+                u32 NESHeight = 240;
+
+                r32 Aspect = (r32)RenderBuffer->Width/(r32)RenderBuffer->Height;
+                r32 NESAspect = (r32)NESWidth/(r32)NESHeight;
+
+                u32 Scale;
+                if(Aspect > NESAspect)
+                {
+                    Scale = RenderBuffer->Height/NESHeight;
+                }
+                else
+                {
+                    Scale = RenderBuffer->Width/NESWidth;
+                }
+                s32 ViewportWidth = NESWidth*Scale;
+                s32 ViewportHeight = NESHeight*Scale;
+                s32 ViewportX = (RenderBuffer->Width - ViewportWidth)/2;
+                s32 ViewportY = (RenderBuffer->Height - ViewportHeight)/2;
+
+                u32 TileY = RenderBuffer->Height - ViewportY - Scale*16*(1 + (Data->TileIndex>>4));
+                u32 TileX = ViewportX + Scale*16*(Data->TileIndex&15);
 
                 RenderTile(&RenderChunk->BackBuffer, Data->Tile,
-                           TileX, TileY, Palette, OffsetX, OffsetY);
+                           TileX, TileY, Palette, Scale, OffsetX, OffsetY);
             } break;
 
             case RenderCommand_aligned_rectangle:

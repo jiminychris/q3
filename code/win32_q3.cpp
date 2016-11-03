@@ -55,6 +55,12 @@ CopyBackBufferToWindow(HDC DeviceContext, win32_backbuffer *BackBuffer)
 {
     TIMED_FUNCTION();
 
+#if 1
+    s32 ViewportWidth = BackBuffer->MonitorWidth;
+    s32 ViewportHeight = BackBuffer->MonitorHeight;
+    s32 ViewportX = 0;
+    s32 ViewportY = 0;
+#else
     u32 NESWidth = 256;
     u32 NESHeight = 240;
     r32 MonitorAspect = (r32)BackBuffer->MonitorWidth/(r32)BackBuffer->MonitorHeight;
@@ -73,6 +79,7 @@ CopyBackBufferToWindow(HDC DeviceContext, win32_backbuffer *BackBuffer)
     s32 ViewportHeight = NESHeight*Scale;
     s32 ViewportX = (BackBuffer->MonitorWidth - ViewportWidth)/2;
     s32 ViewportY = (BackBuffer->MonitorHeight - ViewportHeight)/2;
+#endif
     if(GlobalRenderMode == RenderMode_GDI)
     {
         TIMED_BLOCK("StretchDIBits");
@@ -570,8 +577,18 @@ int WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int S
         s32 MonitorWidth = MonitorRect.Max.x - MonitorRect.Min.x;
         s32 MonitorHeight = MonitorRect.Max.y - MonitorRect.Min.y;
 
+#if 1
+        s32 BackBufferWidth = MonitorWidth;
+        s32 BackBufferHeight = MonitorHeight;
+        while(BackBufferWidth*BackBufferHeight > 1920*1080)
+        {
+            BackBufferWidth /= 2;
+            BackBufferHeight /= 2;
+        }
+#else
         s32 BackBufferWidth = 256;
         s32 BackBufferHeight = 240;
+#endif
 
         s32 WindowWidth = MonitorWidth/2;
         s32 WindowHeight = MonitorHeight/2;
@@ -1243,8 +1260,8 @@ int WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, LPSTR CommandLine, int S
                             NewInput->MostRecentlyUsedController = ControllerIndex;
                         }
                     }
-                    NewInput->MousePosition = {GlobalMousePosition.x,
-                                               MonitorHeight - GlobalMousePosition.y};
+                    NewInput->MousePosition = {(r32)BackBufferWidth*(r32)GlobalMousePosition.x/(r32)MonitorWidth,
+                                               (r32)BackBufferHeight*(1.0f - (r32)GlobalMousePosition.y/(r32)MonitorHeight)};
                     NewInput->LeftMouse = GlobalLeftMouse;
                 }
 
