@@ -29,6 +29,21 @@ enum tile_type
     TileType_TreeFace,
     TileType_TreeTopLeft,
     TileType_TreeTopRight,
+
+    TileType_LinkFront0,
+    TileType_LinkFront1,
+    TileType_LinkFrontStab,
+    TileType_LinkBack0,
+    TileType_LinkBack1,
+    TileType_LinkBackStab,
+    TileType_LinkLeft0,
+    TileType_LinkLeft1,
+    TileType_LinkLeftStab,
+    TileType_LinkRight0,
+    TileType_LinkRight1,
+    TileType_LinkRightStab,
+    TileType_LinkGrab0,
+    TileType_LinkGrab1,
 };
 
 struct loaded_tile

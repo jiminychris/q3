@@ -702,6 +702,10 @@ RenderTile(loaded_bitmap *BackBuffer, loaded_tile *Tile, u32 TileX, u32 TileY, p
             u8 ColorIndex = (*Source >> SourceBitOffset) & 3;
             
             u32 DestColor = Palette->Colors[ColorIndex];
+
+            u32 Mask = AlphaMask(DestColor);
+
+            DestColor = (Mask & DestColor) | ((~Mask) & (*Dest));
             
             *Dest++ = DestColor;
         }
@@ -1822,6 +1826,40 @@ RenderTree(render_buffer *RenderBuffer, render_chunk *RenderChunk,
                            TileX, TileY, Palette, Scale, OffsetX, OffsetY);
             } break;
 
+            case RenderCommand_sprite:
+            {
+                render_sprite_data *Data = (render_sprite_data *)(Header + 1);
+
+                u32 NESWidth = 256;
+                u32 NESHeight = 240;
+
+                u32 HalfBoardWidth = NESWidth>>1;
+                u32 HalfBoardHeight = (16*11)>>1;
+
+                r32 Aspect = (r32)RenderBuffer->Width/(r32)RenderBuffer->Height;
+                r32 NESAspect = (r32)NESWidth/(r32)NESHeight;
+
+                u32 Scale;
+                if(Aspect > NESAspect)
+                {
+                    Scale = RenderBuffer->Height/NESHeight;
+                }
+                else
+                {
+                    Scale = RenderBuffer->Width/NESWidth;
+                }
+                s32 ViewportWidth = NESWidth*Scale;
+                s32 ViewportHeight = NESHeight*Scale;
+                s32 ViewportX = (RenderBuffer->Width - ViewportWidth)/2;
+                s32 ViewportY = (RenderBuffer->Height - ViewportHeight)/2;
+
+                u32 Y = ViewportY + Scale*(HalfBoardHeight + Data->Y - 8);
+                u32 X = ViewportX + Scale*(HalfBoardWidth + Data->X - 8);
+
+                RenderTile(&RenderChunk->BackBuffer, Data->Tile,
+                           X, Y, &Data->Palette, Scale, OffsetX, OffsetY);
+            } break;
+
             case RenderCommand_aligned_rectangle:
             {
                 render_aligned_rectangle_data *Data = (render_aligned_rectangle_data *)(Header + 1);
@@ -1938,7 +1976,8 @@ RenderBufferToBackBuffer(renderer_state *RendererState, render_buffer *RenderBuf
             INSERT_RENDER_COMMAND(aligned_rectangle, Data->SortKey);
             INSERT_RENDER_COMMAND(triangle, Data->SortKey);
             INSERT_RENDER_COMMAND(clear, -REAL32_MAX);
-            INSERT_RENDER_COMMAND(tile, -REAL32_MAX);
+            INSERT_RENDER_COMMAND(tile, -10);
+            INSERT_RENDER_COMMAND(sprite, -5);
 #if Q3_INTERNAL
             INSERT_RENDER_COMMAND(DEBUGrectangle, Data->SortKey);
             INSERT_RENDER_COMMAND(DEBUGtriangle, Data->SortKey);

@@ -26,10 +26,10 @@ TitleScreenMode(game_memory *GameMemory, game_input *Input, renderer_state *Rend
     }
     RenderBuffer->Palettes[0] =
     {
-        0x00000000,
-        0x0000AB00,
-        0x00C0C0C0,
-        0x00FFE3AB,
+        0xFF000000,
+        0xFF00AB00,
+        0xFFC0C0C0,
+        0xFFFFE3AB,
     };
     RenderBuffer->Projection = Projection_None;
     v2 Center = 0.5f*V2i(RenderBuffer->Width, RenderBuffer->Height);
@@ -193,35 +193,6 @@ TitleScreenMode(game_memory *GameMemory, game_input *Input, renderer_state *Rend
             State->PressedStart = true;
         }
     }
-
-    loaded_tile *RockFace = GameState->Assets.Tiles + TileType_RockFace;
-    loaded_tile *RockTop = GameState->Assets.Tiles + TileType_RockTop;
-    loaded_tile *RockCorner1 = GameState->Assets.Tiles + TileType_RockCorner1;
-    loaded_tile *RockCorner3 = GameState->Assets.Tiles + TileType_RockCorner3;
-    loaded_tile *RockCorner4 = GameState->Assets.Tiles + TileType_RockCorner4;
-    loaded_tile *Ground = GameState->Assets.Tiles + TileType_Solid3;
-    loaded_tile *Cave = GameState->Assets.Tiles + TileType_Solid0;
-
-    loaded_tile *Tiles[] =
-    {
-        Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave,
-        Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave,
-        Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave,
-        Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave, Cave,
-        RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, Ground, Ground, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-        RockFace, RockFace, RockFace, RockFace, Cave, RockFace, RockCorner4, Ground, Ground, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-        RockFace, RockFace, RockFace, RockCorner4, Ground, Ground, Ground, Ground, Ground, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-        RockFace, RockFace, RockCorner4, Ground, Ground, Ground, Ground, Ground, Ground, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-        RockFace, RockCorner4, Ground, Ground, Ground, Ground, Ground, Ground, Ground, RockCorner3, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-        Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground,
-        RockTop, RockCorner1, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, RockTop, RockTop,
-        RockFace, RockFace, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, RockFace, RockFace,
-        RockFace, RockFace, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, RockFace, RockFace,
-        RockFace, RockFace, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockFace, RockFace,
-        RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-    };
-
-    PushTiles(RenderBuffer, ArrayCount(Tiles), Tiles);
 
     {
         TIMED_BLOCK("Render Game");

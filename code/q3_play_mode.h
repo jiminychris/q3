@@ -7,65 +7,26 @@
    $Notice: $
    ======================================================================== */
 
+enum facing_direction
+{
+    FacingDirection_Right,
+    FacingDirection_Up,
+    FacingDirection_Left,
+    FacingDirection_Down,
+};
+
 enum entity_type
 {
-    EntityType_Ship = 1<<0,
-    EntityType_FloatingHead = 1<<1,
-    EntityType_Laser = 1<<2,
-    EntityType_Asteroid = 1<<3,
-    EntityType_Letter = 1<<4,
-    EntityType_Wall = 1<<5,
-    EntityType_SpawnTimer = 1<<6,
-    EntityType_ShipExplosionTimer = 1<<7,
-    EntityType_EnemySpawnTimer = 1<<8,
-    EntityType_EnemyShip = 1<<9,
-    EntityType_EnemyLaser = 1<<10,
-    EntityType_EnemyDespawnTimer = 1<<11,
-    EntityType_MetamorphosisTimer = 1<<12,
+    EntityType_Link = 1<<0,
 };
 
 struct entity
 {
     entity_type Type;
     collider_type ColliderType;
-    r32 Mass;
-    v3 P;
-    v3 dP;
-    u32 Target;
-    r32 Yaw;
-    r32 dYaw;
-    r32 Thrust;
-    r32 Flicker;
-    r32 Timer;
-    r32 Duration;
-    v2 Dim;
-
-    collider_type DestroyedBy;
-    r32 BoundingRadius;
-    // NOTE(chris): This is a linked list so this must be maintained.
-    u32 CollisionShapeCount;
-    collision_shape *CollisionShapes;
-    
-    m33 RotationMatrix;
-    char Character;
-#if Q3_INTERNAL
-    u32 UsedLinearIterations;
-    u32 UsedAngularIterations;
-    v3 InitdP;
-    r32 InitdYaw;
-    v3 CollisionStepP[COLLISION_ITERATIONS+1];
-    r32 CollisionStepYaw[COLLISION_ITERATIONS+1];
-    b32 LinearBoundingCircleCollided[COLLISION_ITERATIONS+1];
-    u32 LinearCollidingShapeMask[COLLISION_ITERATIONS+1];
-    b32 AngularBoundingCircleCollided[COLLISION_ITERATIONS+1];
-    u32 AngularCollidingShapeMask[COLLISION_ITERATIONS+1];
-#endif
-};
-
-struct virtual_entities
-{
-    u32 Count;
-    v3 P[4];
+    v2 P;
+    r32 MoveTimer;
+    facing_direction Facing;
 };
 
 struct particle
@@ -122,35 +83,6 @@ struct play_state
     particle Particles[256];
 };
 
-internal r32
-CalculateBoundingRadius(entity *Entity)
-{
-    r32 MaxRadius = 0.0f;
-    for(collision_shape *Shape = Entity->CollisionShapes;
-        Shape;
-        Shape = Shape->Next)
-    {
-        r32 Radius = 0.0f;
-        switch(Shape->Type)
-        {
-            case CollisionShapeType_Circle:
-            {
-                Radius = Length(Shape->Center) + Shape->Radius;
-            } break;
-
-            case CollisionShapeType_Triangle:
-            {
-                Radius = Maximum(Maximum(Length(Shape->A),
-                                         Length(Shape->B)),
-                                 Length(Shape->C));
-            } break;
-        }
-        MaxRadius = Maximum(Radius, MaxRadius);
-    }
-    r32 Result = MaxRadius + 1.0f;
-    return(Result);
-}
-
 inline particle *
 CreateParticle(play_state *State)
 {
@@ -173,17 +105,20 @@ DestroyParticle(play_state *State, particle *Particle)
 }
 
 inline entity *
-CreateEntity(play_state *State, u32 ShapeCount = 0, collision_shape *Shapes = 0)
+CreateEntity(play_state *State)
 {
     entity *Result = State->Entities;
     physics_state *PhysicsState = &State->PhysicsState;
     memory_arena *ShapeArena = &PhysicsState->ShapeArena;
     if(State->EntityCount < ArrayCount(State->Entities))
     {
+#if 0
         if(HasRoomForArray(ShapeArena, ShapeCount, collision_shape))
         {
+#endif
             Result = State->Entities + State->EntityCount++;
             *Result = {};
+#if 0
             for(u32 ShapeIndex = 0;
                 ShapeIndex < ShapeCount;
                 ++ShapeIndex)
@@ -208,6 +143,7 @@ CreateEntity(play_state *State, u32 ShapeCount = 0, collision_shape *Shapes = 0)
         {
             Assert(!"Created too many collision shapes.");
         }
+#endif
     }
     else
     {
@@ -219,6 +155,7 @@ CreateEntity(play_state *State, u32 ShapeCount = 0, collision_shape *Shapes = 0)
 inline void
 DestroyEntity(play_state *State, entity *Entity)
 {
+#if 0
     physics_state *PhysicsState = &State->PhysicsState;
     for(collision_shape *Shape = Entity->CollisionShapes;
         Shape;
@@ -231,9 +168,11 @@ DestroyEntity(play_state *State, entity *Entity)
         
         Shape = Next;
     }
+#endif
     *Entity = State->Entities[--State->EntityCount];
 }
 
+#if 0
 inline b32
 IsDestroyed(entity *Entity)
 {
@@ -261,6 +200,7 @@ CanCollide(play_state *State, entity *A, entity *B)
         CanCollide(&State->PhysicsState, A->ColliderType, B->ColliderType);
     return(Result);
 }
+#endif
 
 #define Q3_PLAY_MODE_H
 #endif

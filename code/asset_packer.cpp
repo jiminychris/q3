@@ -62,9 +62,6 @@ int main(int ArgCount, char **Args)
     errno_t OutFileOpenResult = fopen_s(&OutFile, OUT_PATH, "wb");
     Assert(OutFileOpenResult == 0);
 
-    u32 TileCount = 0;
-    loaded_tile Tiles[256];
-
     named_tile_file NamedTileFiles[] =
     {
         {TileType_Rock, "rock.bmp"},
@@ -84,18 +81,36 @@ int main(int ArgCount, char **Args)
         {TileType_TreeFace, "treeface.bmp"},
         {TileType_TreeTopLeft, "treetl.bmp"},
         {TileType_TreeTopRight, "treetr.bmp"},
+
+        {TileType_LinkFront0, "linkf0.bmp"},
+        {TileType_LinkFront1, "linkf1.bmp"},
+        {TileType_LinkFrontStab, "linkfs.bmp"},
+        {TileType_LinkBack0, "linkb0.bmp"},
+        {TileType_LinkBack1, "linkb1.bmp"},
+        {TileType_LinkBackStab, "linkbs.bmp"},
+        {TileType_LinkLeft0, "linkl0.bmp"},
+        {TileType_LinkLeft1, "linkl1.bmp"},
+        {TileType_LinkLeftStab, "linkls.bmp"},
+        {TileType_LinkRight0, "linkr0.bmp"},
+        {TileType_LinkRight1, "linkr1.bmp"},
+        {TileType_LinkRightStab, "linkrs.bmp"},
+        {TileType_LinkGrab0, "linkg0.bmp"},
+        {TileType_LinkGrab1, "linkg1.bmp"},
     };
+
+    loaded_tile Tiles[ArrayCount(NamedTileFiles)];
+    u32 TileCount = ArrayCount(NamedTileFiles);
 
     u8 Buffer[4096];
     size_t BytesRead;
     u8 *Memory;
     u32 Pitch = TILE_WIDTH*sizeof(u32);
-    for(s32 TileFileIndex = 0;
-        TileFileIndex < ArrayCount(NamedTileFiles);
-        ++TileFileIndex)
+    for(s32 TileIndex = 0;
+        TileIndex < ArrayCount(NamedTileFiles);
+        ++TileIndex)
     {
-        named_tile_file *NamedTileFile = NamedTileFiles + TileFileIndex;
-        Assert(TileFileIndex == NamedTileFile->Type);
+        named_tile_file *NamedTileFile = NamedTileFiles + TileIndex;
+        Assert(TileIndex == NamedTileFile->Type);
         FILE *TileFile;
         errno_t TileFileOpenResult = fopen_s(&TileFile, NamedTileFile->FileName, "rb");
         Assert(TileFileOpenResult == 0);
@@ -122,7 +137,7 @@ int main(int ArgCount, char **Args)
         u32 RedShift = BitScanForward(BMPHeader->RedMask).Index;
 
         u8 *PixelRow = (u8 *)Memory;
-        loaded_tile *Tile = Tiles + TileCount++;
+        loaded_tile *Tile = Tiles + TileIndex;
         u8 *OutByte = Tile->ColorIndices;
         r32 Inv255 = 1.0f / 255.0f;
         for(s32 Y = 0;

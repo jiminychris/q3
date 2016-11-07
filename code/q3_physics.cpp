@@ -6,6 +6,7 @@
    $Notice: $
    ======================================================================== */
 
+#if 0
 inline b32
 ProcessIntersection(r32 Intersection, r32 *tMove)
 {
@@ -512,3 +513,4 @@ ResolveAngularCollision(collision *Collision, entity *Entity, entity *OtherEntit
         }
     }
 }
+#endif

@@ -7,6 +7,14 @@
    $Notice: $
    ======================================================================== */
 
+inline u32
+AlphaMask(u32 Color)
+{
+    u32 Alpha = (Color >> 24);
+    u32 Result = (Color) | (Alpha << 16) | (Alpha << 8) | (Alpha);
+    return(Result);
+}
+
 enum projection
 {
     Projection_None,
@@ -148,6 +156,7 @@ enum render_command
 {
     RenderCommand_bitmap,
     RenderCommand_tile,
+    RenderCommand_sprite,
     RenderCommand_aligned_rectangle,
     RenderCommand_triangle,
     RenderCommand_clear,
@@ -177,6 +186,14 @@ struct render_bitmap_data
 struct render_tile_data
 {
     u32 TileIndex;
+    loaded_tile *Tile;
+};
+
+struct render_sprite_data
+{
+    u32 X;
+    u32 Y;
+    palette Palette;
     loaded_tile *Tile;
 };
 
@@ -241,6 +258,20 @@ PushTile(render_buffer *RenderBuffer, loaded_tile *Tile, u32 TileIndex)
         PushRenderHeader(Data, &RenderBuffer->Arena, tile);
 
         Data->TileIndex = TileIndex;
+        Data->Tile = Tile;
+    }
+}
+
+inline void
+PushSprite(render_buffer *RenderBuffer, loaded_tile *Tile, v2 P, palette *Palette)
+{
+    if(Tile)
+    {
+        PushRenderHeader(Data, &RenderBuffer->Arena, sprite);
+
+        Data->X = RoundU32(P.x);
+        Data->Y = RoundU32(P.y);
+        Data->Palette = *Palette;
         Data->Tile = Tile;
     }
 }
