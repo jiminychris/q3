@@ -43,38 +43,18 @@ struct particle
     v4 Color;
 };
 
-enum enemy_state
-{
-    EnemyState_NotHere,
-    EnemyState_Here,
-    EnemyState_WaitingToSpawn,
-};
-
 struct play_state
 {
     b32 IsInitialized;
-    
-    v3 ShipStartingP;
-    v3 CameraStartingP;
-    r32 ShipStartingYaw;
 
+    u32 LinkPaletteIndex;
+
+    u32 TunicIndex;
+    
     physics_state PhysicsState;
 
-    play_type PlayType;
     b32 Paused;
-    r32 ResetTimer;
-    s32 Difficulty;
     s32 Lives;
-    u32 Points;
-    enemy_state EnemyState;
-    s32 AsteroidCount;
-    seed AsteroidSeed;
-    seed EngineSeed;
-    seed ParticleSeed;
-    seed EnemySeed;
-
-    v4 EnemyColor;
-    v4 ShipColor;
 
     u32 EntityCount;
     entity Entities[256];

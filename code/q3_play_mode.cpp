@@ -87,6 +87,9 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
         State->EntityCount = 1;
 
         CreateLink(State, V2(0, 0), FacingDirection_Up);
+        State->LinkPaletteIndex = 0;
+
+        State->TunicIndex = 0;
     }
 
     game_controller *LinkController = Input->Controllers + Input->MostRecentlyUsedController;
@@ -94,6 +97,96 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
     temporary_memory RenderMemory = BeginTemporaryMemory(&RenderBuffer->Arena);
     PushClear(RendererState, RenderBuffer, V3(0.0f, 0.0f, 0.0f));
     v2 ScreenCenter = 0.5f*V2i(RenderBuffer->Width, RenderBuffer->Height);
+
+    u32 NESPalette[] =
+    {
+        0xFF7C7C7C,
+        0xFF0000FC,
+        0xFF0000BC,
+        0xFF4428BC,
+        0xFF940084,
+        0xFFA80020,
+        0xFFA81000,
+        0xFF881400,
+        0xFF503000,
+        0xFF007800,
+        0xFF006800,
+        0xFF005800,
+        0xFF004058,
+        0xFF000000,
+        0xFF000000,
+        0xFF000000,
+        0xFFBCBCBC,
+        0xFF0078F8,
+        0xFF0058F8,
+        0xFF6844FC,
+        0xFFD800CC,
+        0xFFE40058,
+        0xFFF83800,
+        0xFFE45C10,
+        0xFFAC7C00,
+        0xFF00B800,
+        0xFF00A800,
+        0xFF00A844,
+        0xFF008888,
+        0xFF000000,
+        0xFF000000,
+        0xFF000000,
+        0xFFF8F8F8,
+        0xFF3CBCFC,
+        0xFF6888FC,
+        0xFF9878F8,
+        0xFFF878F8,
+        0xFFF85898,
+        0xFFF87858,
+        0xFFFCA044,
+        0xFFF8B800,
+        0xFFB8F818,
+        0xFF58D854,
+        0xFF58F898,
+        0xFF00E8D8,
+        0xFF787878,
+        0xFF000000,
+        0xFF000000,
+        0xFFFCFCFC,
+        0xFFA4E4FC,
+        0xFFB8B8F8,
+        0xFFD8B8F8,
+        0xFFF8B8F8,
+        0xFFF8A4C0,
+        0xFFF0D0B0,
+        0xFFFCE0A8,
+        0xFFF8D878,
+        0xFFD8F878,
+        0xFFB8F8B8,
+        0xFFB8F8D8,
+        0xFF00FCFC,
+        0xFFF8D8F8,
+        0xFF000000,
+        0xFF000000,
+    };
+
+    palette LinkPalettes[] =
+    {
+        {
+            0x00000000,
+            NESPalette[23],
+            NESPalette[41],
+            NESPalette[40],
+        },
+        {
+            0x00000000,
+            NESPalette[23],
+            NESPalette[50],
+            NESPalette[40],
+        },
+        {
+            0x00000000,
+            NESPalette[23],
+            NESPalette[22],
+            NESPalette[40],
+        },
+    };
 
     if(!State->Paused)
     {
@@ -108,6 +201,15 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
             {
                 case EntityType_Link:
                 {
+                    if(WentDown(LinkController->ActionUp))
+                    {
+                        ++State->LinkPaletteIndex;
+                        if(State->LinkPaletteIndex == ArrayCount(LinkPalettes))
+                        {
+                            State->LinkPaletteIndex = 0;
+                        }
+                    }
+                    
                     v2 dP = {};
                     if(LinkController->LeftStick.y >= 0.5f)
                     {
@@ -171,14 +273,6 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
         RockFace, RockFace, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, Ground, RockFace, RockFace,
         RockFace, RockFace, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockTop, RockFace, RockFace,
         RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace, RockFace,
-    };
-
-    palette LinkPalette =
-    {
-        0x00000000,
-        0xFFC84C0C,
-        0xFF80D010,
-        0xFFFC9838,
     };
     PushTiles(RenderBuffer, ArrayCount(Tiles), Tiles);
 
@@ -250,7 +344,7 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
                         } break;
                     }
                 }
-                PushSprite(RenderBuffer, Link, Entity->P, &LinkPalette);
+                PushSprite(RenderBuffer, Link, Entity->P, LinkPalettes + State->LinkPaletteIndex);
             } break;
         }
             
