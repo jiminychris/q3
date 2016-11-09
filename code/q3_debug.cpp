@@ -471,6 +471,22 @@ DrawNodes(render_buffer *RenderBuffer, text_layout *Layout, debug_frame *Frame, 
             DrawText(RenderBuffer, Layout, TextLength, Text);
         } break;
 
+        case DebugEventType_u32:
+        {
+            debug_node *FrameNode = GetNode(Node->GUID, Frame);
+            TextLength = _snprintf_s(Text, sizeof(Text), "%.*s: %u", NameLength, Node->Name,
+                                     FrameNode->Value_u32);
+            DrawText(RenderBuffer, Layout, TextLength, Text);
+        } break;
+
+        case DebugEventType_s32:
+        {
+            debug_node *FrameNode = GetNode(Node->GUID, Frame);
+            TextLength = _snprintf_s(Text, sizeof(Text), "%.*s: %s", NameLength, Node->Name,
+                                     FrameNode->Value_s32);
+            DrawText(RenderBuffer, Layout, TextLength, Text);
+        } break;
+
         case DebugEventType_r32:
         {
             debug_node *FrameNode = GetNode(Node->GUID, Frame);

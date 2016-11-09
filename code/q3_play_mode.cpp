@@ -88,8 +88,9 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
 
         CreateLink(State, V2(0, 0), FacingDirection_Up);
         State->LinkPaletteIndex = 0;
+        State->DarknutPaletteIndex = 0;
 
-        State->TunicIndex = 0;
+        State->TestColorIndex = 0;
     }
 
     game_controller *LinkController = Input->Controllers + Input->MostRecentlyUsedController;
@@ -188,6 +189,22 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
         },
     };
 
+    palette DarknutPalettes[] =
+    {
+        {
+            0x00000000,
+            NESPalette[22],
+            NESPalette[39],
+            NESPalette[32],
+        },
+        {
+            0x00000000,
+            NESPalette[2],
+            NESPalette[34],
+            NESPalette[32],
+        },
+    };
+
     if(!State->Paused)
     {
         for(u32 EntityIndex = 1;
@@ -203,11 +220,16 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
                 {
                     if(WentDown(LinkController->ActionUp))
                     {
-                        ++State->LinkPaletteIndex;
-                        if(State->LinkPaletteIndex == ArrayCount(LinkPalettes))
+                        ++State->DarknutPaletteIndex;
+                        if(State->DarknutPaletteIndex == ArrayCount(DarknutPalettes))
                         {
-                            State->LinkPaletteIndex = 0;
+                            State->DarknutPaletteIndex = 0;
                         }
+                    }
+
+                    if(WentDown(LinkController->ActionRight))
+                    {
+                        State->TestColorIndex = (State->TestColorIndex + 1) & (ArrayCount(NESPalette) - 1);
                     }
                     
                     v2 dP = {};
@@ -300,22 +322,22 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
                     {
                         case FacingDirection_Right:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkRight0;
+                            Link = GameState->Assets.Tiles + TileType_DarknutRight0;
                         } break;
                     
                         case FacingDirection_Up:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkBack0;
+                            Link = GameState->Assets.Tiles + TileType_DarknutBack0;
                         } break;
                     
                         case FacingDirection_Left:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkLeft0;
+                            Link = GameState->Assets.Tiles + TileType_DarknutLeft0;
                         } break;
                     
                         case FacingDirection_Down:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkFront0;
+                            Link = GameState->Assets.Tiles + TileType_DarknutFront0;
                         } break;
                     }
                 }
@@ -325,26 +347,26 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
                     {
                         case FacingDirection_Right:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkRight1;
+                            Link = GameState->Assets.Tiles + TileType_DarknutRight1;
                         } break;
                     
                         case FacingDirection_Up:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkBack1;
+                            Link = GameState->Assets.Tiles + TileType_DarknutBack1;
                         } break;
                     
                         case FacingDirection_Left:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkLeft1;
+                            Link = GameState->Assets.Tiles + TileType_DarknutLeft1;
                         } break;
                     
                         case FacingDirection_Down:
                         {
-                            Link = GameState->Assets.Tiles + TileType_LinkFront1;
+                            Link = GameState->Assets.Tiles + TileType_DarknutFront1;
                         } break;
                     }
                 }
-                PushSprite(RenderBuffer, Link, Entity->P, LinkPalettes + State->LinkPaletteIndex);
+                PushSprite(RenderBuffer, Link, Entity->P, DarknutPalettes + State->DarknutPaletteIndex);
             } break;
         }
             
@@ -362,6 +384,7 @@ PlayMode(game_memory *GameMemory, game_input *Input, renderer_state *RendererSta
         DEBUG_VALUE("Shape Arena", State->PhysicsState.ShapeArena);
         DEBUG_VALUE("Shape Freelist", (b32)State->PhysicsState.FirstFreeShape);
         DEBUG_VALUE("Render Arena", TranState->RenderBuffer.Arena);
+        DEBUG_VALUE("Test Color Index", State->TestColorIndex);
     }
     EndTemporaryMemory(RenderMemory);
 }

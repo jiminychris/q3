@@ -96,6 +96,15 @@ int main(int ArgCount, char **Args)
         {TileType_LinkRightStab, "linkrs.bmp"},
         {TileType_LinkGrab0, "linkg0.bmp"},
         {TileType_LinkGrab1, "linkg1.bmp"},
+
+        {TileType_DarknutFront0, "darknutf0.bmp"},
+        {TileType_DarknutFront1, "darknutf1.bmp"},
+        {TileType_DarknutBack0, "darknutb0.bmp"},
+        {TileType_DarknutBack1, "darknutb1.bmp"},
+        {TileType_DarknutLeft0, "darknutl0.bmp"},
+        {TileType_DarknutLeft1, "darknutl1.bmp"},
+        {TileType_DarknutRight0, "darknutr0.bmp"},
+        {TileType_DarknutRight1, "darknutr1.bmp"},
     };
 
     loaded_tile Tiles[ArrayCount(NamedTileFiles)];

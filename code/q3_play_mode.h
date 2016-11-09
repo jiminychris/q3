@@ -48,8 +48,9 @@ struct play_state
     b32 IsInitialized;
 
     u32 LinkPaletteIndex;
+    u32 DarknutPaletteIndex;
 
-    u32 TunicIndex;
+    u32 TestColorIndex;
     
     physics_state PhysicsState;
 

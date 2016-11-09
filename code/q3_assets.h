@@ -44,6 +44,15 @@ enum tile_type
     TileType_LinkRightStab,
     TileType_LinkGrab0,
     TileType_LinkGrab1,
+
+    TileType_DarknutFront0,
+    TileType_DarknutFront1,
+    TileType_DarknutBack0,
+    TileType_DarknutBack1,
+    TileType_DarknutLeft0,
+    TileType_DarknutLeft1,
+    TileType_DarknutRight0,
+    TileType_DarknutRight1,
 };
 
 struct loaded_tile
