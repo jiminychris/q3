@@ -1795,7 +1795,7 @@ RenderTree(render_buffer *RenderBuffer, render_chunk *RenderChunk,
                                      ((Data->TileIndex>>1)&7));
 
                 u32 AttributeArea = 2*((Data->TileIndex>>4)&1) + (Data->TileIndex&1);
-                u32 PaletteIndex = (((*AttributeByte) >> (AttributeArea*2)) & 0xFF);
+                u32 PaletteIndex = (((*AttributeByte) >> (AttributeArea*2)) & 3);
 
                 palette *Palette = RenderBuffer->Palettes + PaletteIndex;
 

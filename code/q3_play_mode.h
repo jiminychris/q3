@@ -15,18 +15,38 @@ enum facing_direction
     FacingDirection_Down,
 };
 
-enum entity_type
+enum brain_type
 {
-    EntityType_Link = 1<<0,
+    BrainType_None = 1<<0,
+    BrainType_Player = 1<<1,
+};
+
+enum entity_render_type
+{
+    EntityRenderType_Thief,
+    EntityRenderType_Knight,
+    EntityRenderType_Magician,
+    EntityRenderType_Demon,
+    EntityRenderType_Guard,
+    EntityRenderType_Captain,
+    EntityRenderType_Terminator,
 };
 
 struct entity
 {
-    entity_type Type;
+    brain_type BrainType;
+    entity_render_type RenderType;
     collider_type ColliderType;
     v2 P;
     r32 MoveTimer;
     facing_direction Facing;
+    facing_direction LastFacing;
+};
+
+struct palette_cycle
+{
+    u32 Count;
+    palette *Palettes;
 };
 
 struct particle
@@ -47,9 +67,7 @@ struct play_state
 {
     b32 IsInitialized;
 
-    u32 LinkPaletteIndex;
-    u32 DarknutPaletteIndex;
-
+    u32 TestPaletteIndex;
     u32 TestColorIndex;
     
     physics_state PhysicsState;

@@ -18,19 +18,6 @@ TitleScreenMode(game_memory *GameMemory, game_input *Input, renderer_state *Rend
 
     game_controller *ShipController = Input->Controllers + Input->MostRecentlyUsedController;
 
-    for(u32 AttributeByteIndex = 0;
-        AttributeByteIndex < ArrayCount(RenderBuffer->AttributeTable);
-        ++AttributeByteIndex)
-    {
-        RenderBuffer->AttributeTable[AttributeByteIndex] = 0;
-    }
-    RenderBuffer->Palettes[0] =
-    {
-        0xFF000000,
-        0xFF00AB00,
-        0xFFC0C0C0,
-        0xFFFFE3AB,
-    };
     RenderBuffer->Projection = Projection_None;
     v2 Center = 0.5f*V2i(RenderBuffer->Width, RenderBuffer->Height);
     r32 FadeInDuration = 3.0f;
